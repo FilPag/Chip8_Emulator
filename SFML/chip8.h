@@ -53,15 +53,44 @@ void Chip8::initialize(){
 
 void Chip8::emulateCycle(){
 	this->opcode = memory[pc] << 8 | memory[pc + 1];
-}
 
-void Chip8::runOp(unsigned short op){
-	switch (op){
+	switch (opcode & 0xF000){
+		case 0x000:
+			switch(opcode & 0x00F){
+				case 0x000:
+					//0x00E0 clears the screen
+				break;
 
-		case 0xA2F0:
-			this->indexreg = op & 0x0FFF;
-			this->pc += 2;
-			break;
+				case 0x00E:
+					//0x00EE Returns from subroutine
+				break;
+			}
+		break;
+
+		case 0x2000:
+			stack[sp] = pc;
+			++sp;
+			pc = opcode & 0xFFF;
+		break;
+		case 0xA000:
+			indexreg = opcode & 0x0FFF;
+			pc += 2;
+		break;
+		
+
+		default:
+			printf("Unknown opcode: 0x%X\n", opcode);
+	}
+
+	if(delayTimer > 0)
+		--delayTimer;
+
+	if(soundTimer > 0){
+	
+		if(soundTimer == 1)
+			printf("BEEP!\n");
+
+		--soundTimer;
 	}
 }
 
