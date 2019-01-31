@@ -72,11 +72,21 @@ void Chip8::emulateCycle(){
 			++sp;
 			pc = opcode & 0xFFF;
 		break;
+		case 0x8000:
+		 switch(opcode & 0x000F){
+		 
+			case 0x0004:
+				//TODO
+			break;
+		 }
+
+		 break;
+
 		case 0xA000:
 			indexreg = opcode & 0x0FFF;
 			pc += 2;
 		break;
-		
+
 
 		default:
 			printf("Unknown opcode: 0x%X\n", opcode);

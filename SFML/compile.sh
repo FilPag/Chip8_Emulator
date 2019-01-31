@@ -1,3 +1,3 @@
 #!/bin/bash
-g++ -o $* $*.cpp `sdl2-config --cflags --libs`
+g++ -o $* $*.cpp -lsfml-graphics -lsfml-window -lsfml-system
 echo "Compiled!"
