@@ -1,11 +1,11 @@
 #include <iostream>
-#include <SFML/Graphics.hpp>
+//#include <SFML/Graphics.hpp>
 #include "chip8.h"
 
 Chip8 mychip8;
 
 int main(int argc, char **argv){
-	sf::RenderWindow window(sf::VideoMode(400, 400), "Emulator");
+/*	sf::RenderWindow window(sf::VideoMode(400, 400), "Emulator");
 	while(window.isOpen()){
 
 		sf::Event event;
@@ -15,6 +15,6 @@ int main(int argc, char **argv){
 				window.close();
 		}
 		window.clear();
-	}
+	} */
 	return 0;
 }
