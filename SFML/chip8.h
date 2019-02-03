@@ -76,7 +76,13 @@ void Chip8::emulateCycle(){
 		 switch(opcode & 0x000F){
 		 
 			case 0x0004:
-				//TODO
+				if(V[(opcode & 0x00F0) >> 4] > (0xFF - V[(opcode & 0x0F00) >> 8]))
+					V[0xF] = 1;
+				else
+					V[0xF] = 0;
+				V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
+				pc += 2
+					
 			break;
 		 }
 
