@@ -9,7 +9,7 @@ class Chip8{
 		bool drawFlag;
 		unsigned char memory[4096];
 		unsigned char V[16];
-		unsigned char pixels[2048];
+		unsigned char gfx[2048];
 		unsigned char key[16];
 		unsigned short stack [16];
 		unsigned short pc;
@@ -50,9 +50,11 @@ void Chip8::initialize(){
 	opcode = 0;
 	indexreg = 0;
 	sp = 0;
+	soundTimer = 0;
+	delayTimer = 0;
 
 	for(int i = 0; i < 2048; i++)
-		pixels[i] = 0;
+		gfx[i] = 0;
 
 	for(int i = 0; i < 16; ++i)
 		stack[i] = 0;
@@ -70,14 +72,20 @@ void Chip8::initialize(){
 }
 
 void Chip8::emulateCycle(){
-	opcode = memory[pc] << 8 | memory[pc + 1];
 
+	opcode = memory[pc] << 8 | memory[pc + 1];	
+	
+//	printf("Running opcode 0x%X\n", opcode );
+	
 	switch (opcode & 0xF000){
+		
 		case 0x000:
+			
 			switch(opcode & 0x000F){
+				
 				case 0x0000:
 					for(int i = 0; i < 2048; ++i)
-						pixels[i] = 0x0;
+						gfx[i] = 0x0;
 					drawFlag = true;
 					pc += 2;
 				break;
@@ -186,7 +194,7 @@ void Chip8::emulateCycle(){
 				break;
 
 				case 0x0007: // 8XY7 Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-					if(V[(opcode & 0x00F0) >> 4] < V[(opcode & 0x0F00) >> 8])
+					if(V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4])
 						V[0xF] = 0;
 					else
 						V[0xF] = 1;
@@ -199,11 +207,14 @@ void Chip8::emulateCycle(){
 					V[(opcode & 0x0F00) >> 8] <<= 1;
 					pc += 2;
 				break;
+				
+				default:
+					printf("Unknown opcode [0x8000]: 0x%X\n", opcode);
 		 }
 		break;
 
 		case 0x9000:
-			if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0)] >> 4)
+			if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4])
 				pc += 4;
 			else
 				pc += 2;
@@ -215,18 +226,18 @@ void Chip8::emulateCycle(){
 		break;
 
 		case 0xB000:
-			pc = V[0] + (opcode & 0x0FFF);
+			pc = (opcode & 0x0FFF) + V[0];
 		break;
 
 		case 0xC000: // Generates random number, luls
-			V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF) & (rand() & 0xFF);
+			V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF) & (rand() % 0xFF);
 			pc+=2;
 		break;
 
 		case 0xD000:{
 			unsigned short x = V[(opcode & 0x0F00) >> 8];
 			unsigned short y = V[(opcode & 0x00F0) >> 4];
-			unsigned short height = (opcode & 0x000F);
+			unsigned short height = opcode & 0x000F;
 			unsigned short pixel;
 
 			V[0xF] = 0;
@@ -238,9 +249,9 @@ void Chip8::emulateCycle(){
 
 					if((pixel & (0x80 >> xline)) != 0){
 
-		        if(pixels[(x + xline + ((y + yline) * 64))] == 1)
+		        if(gfx[(x + xline + ((y + yline) * 64))] == 1)
 		          V[0xF] = 1;
-		        pixels[x + xline + ((y + yline) * 64)] ^= 1;
+		        gfx[x + xline + ((y + yline) * 64)] ^= 1;
 	      	}
 				}
 			}
@@ -362,8 +373,8 @@ void Chip8::emulateCycle(){
 
 	if(soundTimer > 0){
 
-		if(soundTimer == 1)
-			printf("BEEP!\n");
+	//	if(soundTimer == 1)
+//			printf("BEEP!\n");
 
 		--soundTimer;
 	}
@@ -376,7 +387,7 @@ void Chip8::debugRender()
 	{
 		for(int x = 0; x < 64; ++x)
 		{
-			if(pixels[(y*64) + x] == 0)
+			if(gfx[(y*64) + x] == 0)
 				printf("O");
 			else
 				printf(" ");
