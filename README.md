@@ -1,2 +1,2 @@
 # Emulationstuff
-A collection of stupid emulation stuff
+A collection of dumb emulation stuff
