@@ -1,2 +1,1 @@
-# Emulationstuff
-A collection of dumb emulation stuff
+# Chip8 Emulator
